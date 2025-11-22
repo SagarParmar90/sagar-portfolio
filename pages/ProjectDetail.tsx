@@ -5,7 +5,7 @@ import { dataService } from '../services/dataService';
 import { Project } from '../types';
 import { Button } from '../components/Button';
 import { generateProjectDescription, createChatSession } from '../services/geminiService';
-import { ThumbsUp, ThumbsDown, Share, Scissors, MoreHorizontal, Send, Sparkles, User, Bot } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Share, Scissors, MoreHorizontal, Send, Sparkles, User, Bot, Link as LinkIcon, Check } from 'lucide-react';
 import { ChatMessage, Comment } from '../types';
 
 export const ProjectDetail: React.FC = () => {
@@ -28,6 +28,9 @@ export const ProjectDetail: React.FC = () => {
   // Comment State
   const [comments, setComments] = useState<Comment[]>(INITIAL_COMMENTS);
   const [newComment, setNewComment] = useState('');
+
+  // Copy Link State
+  const [copySuccess, setCopySuccess] = useState(false);
 
   // Load Project Data
   useEffect(() => {
@@ -124,6 +127,16 @@ export const ProjectDetail: React.FC = () => {
       setNewComment('');
   };
 
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy link', err);
+    }
+  };
+
   if (loading) return <div className="p-10 text-center">Loading Project...</div>;
   if (!project) return <div className="p-10 text-center">Project not found</div>;
 
@@ -167,6 +180,15 @@ export const ProjectDetail: React.FC = () => {
                     </button>
                 </div>
                 <Button variant="secondary" size="sm" className="h-9 rounded-full" icon={<Share size={18}/>}>Share</Button>
+                <Button 
+                  variant="secondary" 
+                  size="sm" 
+                  className={`h-9 rounded-full transition-all duration-200 ${copySuccess ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ''}`} 
+                  icon={copySuccess ? <Check size={18}/> : <LinkIcon size={18}/>}
+                  onClick={handleCopyLink}
+                >
+                  {copySuccess ? 'Copied!' : 'Copy Link'}
+                </Button>
                 <Button variant="secondary" size="sm" className="h-9 rounded-full hidden sm:flex" icon={<Scissors size={18}/>}>Clip</Button>
                 <Button variant="secondary" size="sm" className="h-9 w-9 p-0 rounded-full flex items-center justify-center"><MoreHorizontal size={18}/></Button>
             </div>
